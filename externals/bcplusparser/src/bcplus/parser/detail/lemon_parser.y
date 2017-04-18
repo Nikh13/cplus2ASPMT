@@ -1853,19 +1853,21 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 			bnd = new ConstantDeclaration::ElementList();
 
 			if(implicit){
-				ReferencedString const* durationDecl = new ReferencedString("duration");
-				ReferencedString const* durationSortString = new ReferencedString("real[0..50]");
-				SortSymbol* durationSort = parser->symtab()->resolveOrCreate(new SortSymbol(durationSortString));
-				ref_ptr<ConstantSymbol> duration = new ConstantSymbol(ConstantSymbol::Type::EXOGENOUSACTION, durationDecl, durationSort, NULL);
-				bnd->push_back(duration);
-				CONSTANT_DECL(duration, nr->beginLoc());
 
 				ReferencedString const* modeDecl = new ReferencedString("mode");
 				ReferencedString const* modeSortString = new ReferencedString("real[0..3]");
 				SortSymbol* modeSort = parser->symtab()->resolveOrCreate(new SortSymbol(modeSortString));
 				ref_ptr<ConstantSymbol> mode = new ConstantSymbol(ConstantSymbol::Type::INERTIALFLUENT, modeDecl, modeSort, NULL);
 				bnd->push_back(mode);
+
 				CONSTANT_DECL(mode, nr->beginLoc());
+				
+				ReferencedString const* durationDecl = new ReferencedString("duration");
+				ReferencedString const* durationSortString = new ReferencedString("real[0..50]");
+				SortSymbol* durationSort = parser->symtab()->resolveOrCreate(new SortSymbol(durationSortString));
+				ref_ptr<ConstantSymbol> duration = new ConstantSymbol(ConstantSymbol::Type::EXOGENOUSACTION, durationDecl, durationSort, NULL);
+				bnd->push_back(duration);
+				CONSTANT_DECL(duration, nr->beginLoc());
 
 				ReferencedString const* waitDecl = new ReferencedString("wait");
 				ref_ptr<SortSymbol> waitSort = parser->symtab()->bsort(SymbolTable::BuiltinSort::BOOLEAN);
