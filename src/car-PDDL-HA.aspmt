@@ -1,0 +1,94 @@
+:- sorts
+state;step;astep.
+
+:- objects
+0..maxstep :: step;
+0..maxstep-1 :: astep;
+stopped,running:: state.
+
+:- constants
+currentState(step) :: state;
+distance(step) :: real[0..100];
+speed(step) :: real[0..100];
+acceleration(step) :: real[0..100];
+accelerate(astep) :: boolean;
+decelerate(astep) :: boolean;
+startEngine(astep) :: boolean;
+stop(astep) :: boolean;
+duration(astep) :: real[0..100];
+someAction(astep) :: boolean.
+
+:- variables
+S :: step;
+ST :: state;
+ST1 :: state;
+AS :: astep.
+
+% inertial fluents
+{currentState(AS+1)=ST}<-currentState(AS)=ST.
+
+% exogenous Actions
+{duration(AS)=X}.
+{accelerate(AS)=X}.
+{decelerate(AS)=X}.
+{startEngine(AS)=X}.
+{stop(AS)=X}.
+
+%Sytem Rules
+duration(AS)=0<-accelerate(AS).
+duration(AS)=0<-decelerate(AS).
+duration(AS)=0<-startEngine(AS).
+duration(AS)=0<-stop(AS).
+
+{~someAction(AS)}.
+%someAction(AS) <- accelerate(AS).
+%someAction(AS) <- decelerate(AS).
+%someAction(AS) <- stop(AS).
+%someAction(AS) <- startEngine(AS).
+
+%Flow
+distance(AS+1) = D <- currentState(AS)=stopped & distance(AS) = D1 & duration(AS) = T & D = D1 + 0*T & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+speed(AS+1) = X <- currentState(AS)=stopped & speed(AS) = X1 & duration(AS) = T & X = X1 + 0*T & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+acceleration(AS+1) = X <- currentState(AS)=stopped & acceleration(AS) = X1 & duration(AS) = T & X = X1 + 0*T & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+
+distance(AS+1) = D <- speed(AS) = X1 & acceleration(AS) = X2 & currentState(AS)=running & distance(AS) = D1 & duration(AS) = T & D = D1 + (X1+(X2*T))*T  & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+speed(AS+1) = X <- acceleration(AS) = X2 & currentState(AS)=running & speed(AS) = X1 & duration(AS) = T & X = X1 + X2*T  & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+acceleration(AS+1) = X <- currentState(AS)=running & acceleration(AS) = X1 & duration(AS) = T & X = X1 + 0*T  & -(stop(AS)) & -(accelerate(AS)) & -(decelerate(AS)) & -(startEngine(AS)).
+
+%Guard
+<- startEngine(AS) & -(currentState(AS)=stopped).
+
+<- stop(AS) & -(currentState(AS)=running).
+<- stop(AS) & -(speed(AS)=0).
+
+<- accelerate(AS) & -(currentState(AS)=running).
+
+<- decelerate(AS) & -(currentState(AS)=running).
+
+%Reset
+distance(AS+1) = RP <- startEngine(AS) & distance(AS) = D & RP=D.
+speed(AS+1) = R <- startEngine(AS) & R=0.
+acceleration(AS+1) = R <- startEngine(AS) & R=0 .
+currentState(AS+1)=running <- startEngine(AS) & currentState(AS)=stopped.
+
+distance(AS+1) = RP <- accelerate(AS) & distance(AS) = D & RP=D.
+speed(AS+1) = R <- accelerate(AS) & speed(AS) =X & R=X.
+acceleration(AS+1) = R <- accelerate(AS) & acceleration(AS)=X & R=X+1.
+currentState(AS+1)=running <- accelerate(AS) & currentState(AS)=running.
+
+distance(AS+1) = RP <- decelerate(AS) & distance(AS) = D & RP=D.
+speed(AS+1) = R <- decelerate(AS) & speed(AS) =X & R=X.
+acceleration(AS+1) = R <- decelerate(AS) & acceleration(AS)=X & R=X-1.
+currentState(AS+1)=running <- decelerate(AS) & currentState(AS)=running.
+
+distance(AS+1) = RP <- stop(AS) & distance(AS) = D & RP=D.
+speed(AS+1) = R <- stop(AS) & R=0.
+acceleration(AS+1) = R <- stop(AS) & R=0 .
+currentState(AS+1)=stopped <- stop(AS) & currentState(AS)=running.
+
+distance(0)=0.
+speed(0)=0.
+acceleration(0)=0.
+currentState(0)=stopped.
+startEngine(0).
+
