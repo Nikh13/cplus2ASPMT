@@ -1852,13 +1852,6 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 
 			bnd = new ConstantDeclaration::ElementList();
 
-			BOOST_FOREACH(IdentifierDecl& decl, *names) {
-				// attempt to declare each symbol
-				ref_ptr<ConstantSymbol> c = new ConstantSymbol(ConstantSymbol::Type::CONTINUOUSFLUENT, decl.first->str(), s_ptr, decl.second);
-				bnd->push_back(c);
-				CONSTANT_DECL(c, decl.first->beginLoc());
-			}
-
 			if(implicit){
 				ReferencedString const* durationDecl = new ReferencedString("duration");
 				ReferencedString const* durationSortString = new ReferencedString("real[0..50]");
@@ -1881,6 +1874,15 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 				CONSTANT_DECL(wait, nr->beginLoc());
 				implicit=false;
 			}
+
+			BOOST_FOREACH(IdentifierDecl& decl, *names) {
+				// attempt to declare each symbol
+				ref_ptr<ConstantSymbol> c = new ConstantSymbol(ConstantSymbol::Type::CONTINUOUSFLUENT, decl.first->str(), s_ptr, decl.second);
+				bnd->push_back(c);
+				CONSTANT_DECL(c, decl.first->beginLoc());
+			}
+
+
 		}
 constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON sort(s).
 	{
