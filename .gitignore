@@ -27,7 +27,7 @@ libtool
 /aclocal.m4
 
 # Compiled Binaries
-/src/cplusode.bin
+src/cplusode.bin
 /external/as2transition/src/as2transition
 /external/bcplusparser/src/bcplusodeparser
 /build*/
