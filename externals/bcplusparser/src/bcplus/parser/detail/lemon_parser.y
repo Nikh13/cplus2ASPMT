@@ -117,7 +117,6 @@
 %nonassoc DERIVATIVE. // derivative
 %nonassoc IF.              // if
 %nonassoc IS.              // is
-%nonassoc OF.              // of
 %nonassoc MODE.              // if
 %nonassoc IFCONS.
 %nonassoc INCREMENTS.      // increments
