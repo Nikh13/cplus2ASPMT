@@ -79,6 +79,7 @@ Token* Scanner::tokenize_2(ScannerRawSource* source) {
 				<NORMAL> "causes"/NW					{ ret = T_CAUSES;						goto re2c_finish;					}
 				<NORMAL> "constants"/NW					{ ret = T_CONSTANTS;					goto re2c_finish;					}
 				<NORMAL> "constraint"/NW				{ ret = T_CONSTRAINT;					goto re2c_finish;					}
+				<NORMAL> "derivative"/NW				{ ret = T_DERIVATIVE;					goto re2c_finish;					}
 				<NORMAL> "decrements"/NW				{ ret = T_DECREMENTS;					goto re2c_finish;					}
 				<NORMAL> "default"/NW					{ ret = T_DEFAULT;						goto re2c_finish;					}
 				<NORMAL> "externalAction"/NW			{ ret = T_EXTERNALACTION;				goto re2c_finish;					}
@@ -89,6 +90,7 @@ Token* Scanner::tokenize_2(ScannerRawSource* source) {
 				<NORMAL> "cos"/NW					{ ret = T_COS;						goto re2c_finish;					}
 				<NORMAL> "tan"/NW					{ ret = T_TAN;						goto re2c_finish;					}
 				<NORMAL> "d/dt"/NW			{ ret = T_DDT;				goto re2c_finish;					}
+				<NORMAL> "is"/NW						{ ret = T_IS;							goto re2c_finish;					}
 				<NORMAL> "if"/NW						{ ret = T_IF;							goto re2c_finish;					}
 				<NORMAL> "ifcons"/NW					{ ret = T_IFCONS;						goto re2c_finish;					}
 				<NORMAL> "impossible"/NW				{ ret = T_IMPOSSIBLE;					goto re2c_finish;					}
