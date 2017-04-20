@@ -114,7 +114,10 @@
 %nonassoc EXOGENOUS.       // exogenous
 %nonassoc EXOGENOUSACTION. // exogenousAction
 %nonassoc DDT. // d/dt
+%nonassoc DERIVATIVE. // derivative
 %nonassoc IF.              // if
+%nonassoc IS.              // is
+%nonassoc OF.              // of
 %nonassoc MODE.              // if
 %nonassoc IFCONS.
 %nonassoc INCREMENTS.      // increments
@@ -1861,7 +1864,7 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 				bnd->push_back(mode);
 
 				CONSTANT_DECL(mode, nr->beginLoc());
-				
+
 				ReferencedString const* durationDecl = new ReferencedString("duration");
 				ReferencedString const* durationSortString = new ReferencedString("real[0..50]");
 				SortSymbol* durationSort = parser->symtab()->resolveOrCreate(new SortSymbol(durationSortString));
@@ -2974,7 +2977,7 @@ clause_where(new_f) ::= .									{ new_f = NULL; }
 %type      	rate_decl				{ RateDeclaration*									}			// F if G...
 %destructor rate_decl				{ DEALLOC($$);									}
 
-rate_decl(r) ::= DDT BRACKET_L constant(c) BRACKET_R EQ term(t) IF MODE EQ INTEGER(i) PERIOD.  { r = new RateDeclaration(c,t,i->str()); }
+rate_decl(r) ::= DERIVATIVE OF constant(c) IS term(t) IF MODE EQ INTEGER(i) PERIOD.  { r = new RateDeclaration(c,t,i->str()); }
 /*rate_decl(r) ::= DDT PERIOD.  { r = new RateDeclaration(c,t,i); }*/
 
 /********************************************************************************************************************************/
