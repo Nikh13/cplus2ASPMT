@@ -13,4 +13,4 @@ endif
 
 
 # A list of subdirectories we need to work on.
-SUBDIRS =  $(EXTRA_DIRS) src/cplus2aspmttrans
+SUBDIRS =  $(EXTRA_DIRS) src/
