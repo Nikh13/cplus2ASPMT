@@ -2093,7 +2093,7 @@ namespace cplusode_bin {
 					}
 				}
 
-				#define TRANS_CLAUSE(out, hasbody, clause, context, notnot, cont, zero) 									\
+				// #define TRANS_CLAUSE(out, hasbody, clause, context, notnot, cont, zero) 									\
 				if (clause) {																				\
 					if (hasbody) out << " & ";																\
 					hasbody = true;																			\
@@ -2101,6 +2101,18 @@ namespace cplusode_bin {
 						out << "not not ( ";																\
 						bindAndTranslate(clause, context, out, cont, zero);												\
 						out << ")";																			\
+					} else {																				\
+						translate(clause, context, out, cont, zero);													\
+					}																						\
+					HANDLE_CLAUSES(out, false, false);														\
+				}
+
+				#define TRANS_CLAUSE(out, hasbody, clause, context, notnot, cont, zero) 									\
+				if (clause) {																				\
+					if (hasbody) out << " & ";																\
+					hasbody = true;																			\
+					if (notnot) {																			\
+						bindAndTranslate(clause, context, out, cont, zero);												\
 					} else {																				\
 						translate(clause, context, out, cont, zero);													\
 					}																						\
@@ -2139,6 +2151,7 @@ namespace cplusode_bin {
 				}
 
 
+				tmpout.str("");
 				// translate base
 				if (lt == LawType::RIGID || lt == LawType::STATIC) {
 					u::ref_ptr<Context> hc = new Context(config(), Context::Position::HEAD, IPart::BASE, preStmts, extraClauses);
@@ -2148,11 +2161,10 @@ namespace cplusode_bin {
 					assertIPart(IPart::BASE);
 					if(continous){
 						TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, NULL, tmpout, true, true);
-						tmpout.str("");
-						TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, NULL, tmpout, true, false);
 					}
-					else
+					else{
 						TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, NULL, tmpout, false, false);
+					}
 					// TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, NULL, tmpout, false, false);
 				}
 
@@ -2167,8 +2179,14 @@ namespace cplusode_bin {
 
 					assertIPart(IPart::CUMULATIVE);
 					if(continous){
+
+						if(lt == LawType::ACTION_DYNAMIC || lt == LawType::FLUENT_DYNAMIC){
 						TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, ac, tmpout, true, true);
 						tmpout.str("");
+						}
+						if(lt == LawType::STATIC){
+							bc = new Context(config(), Context::Position::BODY, IPart::CUMULATIVE, preStmts, extraClauses, NULL, !head->cmask(), config()->ts(Configuration::TS::ACTION));
+						}
 						TRANSLATE(head, ifbody, ifcons, after, unless, where, hc, bc, nc, ac, tmpout, true, false);
 					}
 					else {
@@ -3862,11 +3880,7 @@ namespace cplusode_bin {
 				if(cont && zero)
 					out << "0";
 				else if(cont && !zero && (constant->symbol()->constType() != sy::ConstantSymbol::Type::CONTINUOUSFLUENT)){
-					if(*(c->ts())=="ST")
-						out << "ST+1";
-					else{
-							out << "ST";
-						}
+					out << "ST";
 				}
 				else {
 					out << *(c->ts());
