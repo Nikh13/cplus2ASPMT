@@ -133,7 +133,8 @@
 %nonassoc NONEXECUTABLE.   // onexecutable
 %nonassoc OF.              // of
 %nonassoc POSSIBLY_CAUSED. // possibly caused
-%nonassoc REAL.           // rigid
+%nonassoc REAL.           // real
+%nonassoc INTEGER_TYPE.           // integer type
 %nonassoc CONTINUOUS.           // continuousFluent
 %nonassoc RIGID.           // rigid
 %nonassoc SDFLUENT.        // sdFluent
@@ -1795,6 +1796,81 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 			CONSTANT_DECL(c, decl.first->beginLoc());
 		}
 	}
+	constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) PAREN_L INTEGER_TYPE BRACKET_L num_range(nr) BRACKET_R PAREN_R.
+		{
+			Term const* min = nr->min();
+			ObjectSymbol const* minos;
+			ref_ptr<const Object> minObj;
+			ref_ptr<const UnaryTerm> minut;
+			std::string preMin = "";
+			switch(min->subType()){
+				case Term::Type::OBJECT:
+					minObj = (Object const*)min;
+					minos = minObj->symbol();
+					break;
+				case Term::Type::UNARY:
+					minut = (UnaryTerm const*)min;
+					switch (minut->op()) {
+						case UnaryTerm::Operator::NEGATIVE:			preMin = "-";			break;
+						default:
+						preMin = "<unknown op>";
+						break;
+					}
+					minObj = (Object const*)minut->sub();
+					minos = minObj->symbol();
+					break;
+				default:
+					break;
+			}
+			Term const* max = nr->max();
+			ObjectSymbol const* maxos;
+			ref_ptr<const Object> maxObj;
+			ref_ptr<const UnaryTerm> maxut;
+			std::string preMax = "";
+			switch(max->subType()){
+				case Term::Type::OBJECT:
+					maxObj = (Object const*)max;
+					maxos = maxObj->symbol();
+					break;
+				case Term::Type::UNARY:
+					maxut = (UnaryTerm const*)max;
+					switch (maxut->op()) {
+						case UnaryTerm::Operator::NEGATIVE:			preMax = "-";			break;
+						default:
+						preMax = "<unknown op>";
+						break;
+					}
+					maxObj = (Object const*)maxut->sub();
+					maxos = maxObj->symbol();
+					break;
+				default:
+					break;
+			}
+			std::string temp = "integer["+preMin+*minos->base()+".."+preMax+*maxos->base()+"]";
+			ReferencedString const* domainString = new ReferencedString(temp);
+			SortSymbol* s = parser->symtab()->resolveOrCreate(new SortSymbol(domainString));
+			ref_ptr<const Referenced> nr_ptr = nr;
+			ref_ptr<const Referenced> names_ptr = names;
+			ref_ptr<const SortSymbol> s_ptr = s;
+
+			bnd = new ConstantDeclaration::ElementList();
+
+			// NOTE: additive constants default to the additive sort, not the boolean sort
+			// if (type & ConstantSymbol::Type::M_ADDITIVE) s_ptr = parser->symtab()->bsort(SymbolTable::BuiltinSort::ADDITIVE);
+
+			// external constants should have "unknown" in their sort
+			if (type & ConstantSymbol::Type::M_EXTERNAL) s_ptr = parser->symtab()->carrot(s);
+
+			// non-boolean abActions should contain "none"
+			else if (type == ConstantSymbol::Type::ABACTION && s_ptr->domainType() != DomainType::BOOLEAN) s_ptr = parser->symtab()->star(s);
+
+			BOOST_FOREACH(IdentifierDecl& decl, *names) {
+				// attempt to declare each symbol
+				ref_ptr<ConstantSymbol> c = new ConstantSymbol(type, decl.first->str(), s_ptr, decl.second);
+				bnd->push_back(c);
+				CONSTANT_DECL(c, decl.first->beginLoc());
+			}
+		}
 	constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON CONTINUOUS PAREN_L num_range(nr) PAREN_R.
 		{
 			Term const* min = nr->min();
@@ -1906,6 +1982,27 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON REAL BRACKET_L num_range
 		ObjectSymbol const* minos = min->symbol();
 		ObjectSymbol const* maxos = max->symbol();
 		std::string temp = "real["+*minos->base()+".."+*maxos->base()+"]";
+		ReferencedString const* domainString = new ReferencedString(temp);
+		SortSymbol* s = parser->symtab()->resolveOrCreate(new SortSymbol(domainString));
+		ref_ptr<const Referenced> nr_ptr = nr;
+		ref_ptr<const Referenced> names_ptr = names;
+		ref_ptr<const SortSymbol> s_ptr = s;
+
+		bnd = new ConstantDeclaration::ElementList();
+		BOOST_FOREACH(IdentifierDecl& decl, *names) {
+			// attempt to declare each symbol
+			ref_ptr<ConstantSymbol> c = new ConstantSymbol(ConstantSymbol::Type::RIGID, decl.first->str(), s, decl.second);
+			bnd->push_back(c);
+			CONSTANT_DECL(c, decl.first->beginLoc());
+		}
+	}
+constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON INTEGER_TYPE BRACKET_L num_range(nr) BRACKET_R.
+	{
+		ref_ptr<const Object> min = (Object const*)nr->min();
+		ref_ptr<const Object> max = (Object const*)nr->max();
+		ObjectSymbol const* minos = min->symbol();
+		ObjectSymbol const* maxos = max->symbol();
+		std::string temp = "integer["+*minos->base()+".."+*maxos->base()+"]";
 		ReferencedString const* domainString = new ReferencedString(temp);
 		SortSymbol* s = parser->symtab()->resolveOrCreate(new SortSymbol(domainString));
 		ref_ptr<const Referenced> nr_ptr = nr;
@@ -2246,6 +2343,69 @@ attrib_spec(attr) ::= ATTRIBUTE(kw) PAREN_L sort(s) PAREN_R.
 					break;
 			}
 			std::string temp = "real["+preMin+*minos->base()+".."+preMax+*maxos->base()+"]";
+			ReferencedString const* domainString = new ReferencedString(temp);
+			SortSymbol* s = parser->symtab()->resolveOrCreate(new SortSymbol(domainString));
+			ref_ptr<const Referenced> nr_ptr = nr;
+			ref_ptr<const Referenced> kw_ptr = kw, s_ptr = s;
+			if (!parser->lang()->support(Language::Feature::CONST_ATTRIBUTE)) {
+				parser->_feature_error(Language::Feature::CONST_ATTRIBUTE, &kw->beginLoc());
+				YYERROR;
+			} else {
+				attr = parser->symtab()->star(s);
+			}
+		}
+	attrib_spec(attr) ::= ATTRIBUTE(kw) PAREN_L INTEGER_TYPE BRACKET_L num_range(nr) BRACKET_R PAREN_R.
+		{
+			attr = NULL;
+			Term const* min = nr->min();
+			ObjectSymbol const* minos;
+			ref_ptr<const Object> minObj;
+			ref_ptr<const UnaryTerm> minut;
+			std::string preMin = "";
+			switch(min->subType()){
+				case Term::Type::OBJECT:
+					minObj = (Object const*)min;
+					minos = minObj->symbol();
+					break;
+				case Term::Type::UNARY:
+					minut = (UnaryTerm const*)min;
+					switch (minut->op()) {
+						case UnaryTerm::Operator::NEGATIVE:			preMin = "-";			break;
+						default:
+						preMin = "<unknown op>";
+						break;
+					}
+					minObj = (Object const*)minut->sub();
+					minos = minObj->symbol();
+					break;
+				default:
+					break;
+			}
+			Term const* max = nr->max();
+			ObjectSymbol const* maxos;
+			ref_ptr<const Object> maxObj;
+			ref_ptr<const UnaryTerm> maxut;
+			std::string preMax = "";
+			switch(max->subType()){
+				case Term::Type::OBJECT:
+					maxObj = (Object const*)max;
+					maxos = maxObj->symbol();
+					break;
+				case Term::Type::UNARY:
+					maxut = (UnaryTerm const*)max;
+					switch (maxut->op()) {
+						case UnaryTerm::Operator::NEGATIVE:			preMax = "-";			break;
+						default:
+						preMax = "<unknown op>";
+						break;
+					}
+					maxObj = (Object const*)maxut->sub();
+					maxos = maxObj->symbol();
+					break;
+				default:
+					break;
+			}
+			std::string temp = "integer["+preMin+*minos->base()+".."+preMax+*maxos->base()+"]";
 			ReferencedString const* domainString = new ReferencedString(temp);
 			SortSymbol* s = parser->symtab()->resolveOrCreate(new SortSymbol(domainString));
 			ref_ptr<const Referenced> nr_ptr = nr;

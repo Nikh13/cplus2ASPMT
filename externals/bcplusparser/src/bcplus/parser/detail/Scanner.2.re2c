@@ -97,6 +97,7 @@ Token* Scanner::tokenize_2(ScannerRawSource* source) {
 				<NORMAL> "increments"/NW				{ ret = T_INCREMENTS;					goto re2c_finish;					}
 				<NORMAL> "inertial"/NW					{ ret = T_INERTIAL;						goto re2c_finish;					}
 				<NORMAL> "inertialFluent"/NW			{ ret = T_INERTIALFLUENT;				goto re2c_finish;					}
+				<NORMAL> "integer"/NW			{ ret = T_INTEGER_TYPE;				goto re2c_finish;					}
 				<NORMAL> "label"/NW						{ ret = T_LABEL;						goto re2c_finish;					}
 				<NORMAL> "may" WS+ "cause"/NW			{ ret = T_MAY_CAUSE;					goto re2c_finish;					}
 				<NORMAL> "maxAdditive"/NW				{ ret = T_MAXADDITIVE;					goto re2c_finish;					}
