@@ -4260,6 +4260,9 @@ namespace cplusode_bin {
 			if(base.find("real")!=std::string::npos){
 				tmp << (global ? "G" : "L") << "VAR_real";
 			}
+			if(base.find("integer")!=std::string::npos){
+				tmp << (global ? "G" : "L") << "VAR_integer";
+			}
 			else if(base.find("continuousFluent")!=std::string::npos){
 				tmp << (global ? "G" : "L") << "VAR_continuous";
 			}
