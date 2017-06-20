@@ -1933,7 +1933,7 @@ constant_bnd(bnd) ::= constant_dcl_lst(names) DBL_COLON constant_dcl_type(type) 
 			if(implicit){
 
 				ReferencedString const* modeDecl = new ReferencedString("mode");
-				ReferencedString const* modeSortString = new ReferencedString("real[0..3]");
+				ReferencedString const* modeSortString = new ReferencedString("real");
 				SortSymbol* modeSort = parser->symtab()->resolveOrCreate(new SortSymbol(modeSortString));
 				ref_ptr<ConstantSymbol> mode = new ConstantSymbol(ConstantSymbol::Type::INERTIALFLUENT, modeDecl, modeSort, NULL);
 				bnd->push_back(mode);

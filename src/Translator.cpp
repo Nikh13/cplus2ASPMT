@@ -2112,7 +2112,7 @@ namespace cplusode_bin {
 					if (hasbody) out << " & ";																\
 					hasbody = true;																			\
 					if (notnot) {																			\
-						bindAndTranslate(clause, context, out, cont, zero);												\
+						bindAndTranslate(clause, context, out, false, cont, zero);												\
 					} else {																				\
 						translate(clause, context, out, cont, zero);													\
 					}																						\
@@ -2130,10 +2130,10 @@ namespace cplusode_bin {
 					\
 					TRANS_CLAUSE(tmpout, hasbody, ifbody, bc, (config()->inputLanguage() == Configuration::Input::CPLUS && head->cmask()), cont, zero);\
 					TRANS_CLAUSE(tmpout, hasbody, ifcons, nc, head->cmask(), cont, zero);						\
-					TRANS_CLAUSE(tmpout, hasbody, after, ac, false,cont, zero);								\
+					TRANS_CLAUSE(tmpout, hasbody, after, ac, false, cont, zero);								\
 					\
-					TRANS_CLAUSE(tmpout, hasbody, unless, ac, false,cont, zero);								\
-					TRANS_CLAUSE(tmpout, hasbody, where, bc, false,cont, zero);								\
+					TRANS_CLAUSE(tmpout, hasbody, unless, ac, false, cont, zero);								\
+					TRANS_CLAUSE(tmpout, hasbody, where, bc, false, cont, zero);								\
 				}																					\
 				tmpout << "." << std::endl;															\
 				\
@@ -3248,27 +3248,27 @@ namespace cplusode_bin {
 							break;
 
 							case el::BinaryFormula::Operator::OR:
-							bindAndTranslate(bf->left(), c, out, cont, zero);
+							bindAndTranslate(bf->left(), c, out, false, cont, zero);
 							out << " | ";
-							bindAndTranslate(bf->right(), c, out, cont, zero);
+							bindAndTranslate(bf->right(), c, out, false, cont, zero);
 							break;
 
 							case el::BinaryFormula::Operator::EQUIV:
-							bindAndTranslate(bf->left(), c, out, cont, zero);
+							bindAndTranslate(bf->left(), c, out, false, cont, zero);
 							out << " <-> ";
-							bindAndTranslate(bf->right(), c, out, cont, zero);
+							bindAndTranslate(bf->right(), c, out, false, cont, zero);
 							break;
 
 							case el::BinaryFormula::Operator::IMPL:
-							bindAndTranslate(bf->left(), c, out, cont, zero);
+							bindAndTranslate(bf->left(), c, out, false, cont, zero);
 							out << " -> ";
-							bindAndTranslate(bf->right(), c, out, cont, zero);
+							bindAndTranslate(bf->right(), c, out, false, cont, zero);
 							break;
 
 							case el::BinaryFormula::Operator::REV_IMPL:
-							bindAndTranslate(bf->right(), c, out, cont, zero);
+							bindAndTranslate(bf->right(), c, out, false, cont, zero);
 							out << " -> ";
-							bindAndTranslate(bf->left(), c, out, cont, zero);
+							bindAndTranslate(bf->left(), c, out, false, cont, zero);
 							break;
 
 							default:
@@ -3446,7 +3446,7 @@ namespace cplusode_bin {
 
 
 							// translate!
-							bindAndTranslate(cf->formula(), subc, out, cont, zero);
+							bindAndTranslate(cf->formula(), subc, out, false, cont, zero);
 
 						} else {
 							u::ref_ptr<Context> subc = c->mkPos(Context::Position::BODY);
@@ -3597,7 +3597,6 @@ namespace cplusode_bin {
 
 
 			bool Translator::translate(el::Term const* t, Context* c, std::ostream& out, bool cont, bool zero) {
-
 				if (t->parens()) out << "(";
 
 				switch (t->subType()) {
@@ -3870,7 +3869,6 @@ namespace cplusode_bin {
 				break;
 			}
 			*/
-
 			translate(constant->symbol(), c, out, false);
 			if((cont && !zero && (constant->symbol()->constType() == sy::ConstantSymbol::Type::CONTINUOUSFLUENT)) || (cont && zero && (*c->ts()=="ST") && (constant->symbol()->constType() == sy::ConstantSymbol::Type::CONTINUOUSFLUENT)))
 				out<<"_t";
